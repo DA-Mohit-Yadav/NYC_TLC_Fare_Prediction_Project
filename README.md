@@ -8,72 +8,115 @@
 </p>
 
 ## Overview
+This project builds a machine learning model to predict taxi fare amounts using **New York City Taxi and Limousine Commission (TLC)** trip data. It covers the complete data science workflow, including domain understanding, data cleaning, exploratory data analysis (EDA), feature engineering, statistical testing, and ensemble modeling.
 
-This project builds a machine learning model to predict taxi fare amount using New York City Taxi and Limousine Commission trip data.
+The primary objective is to estimate the correct fare for a taxi ride and use these predictions to identify potential **overcharging, meter issues, or data anomalies**.
 
-The work covers complete data science flow from domain understanding to data cleaning, exploratory data analysis, feature engineering, model building, hyperparameter tuning, and model saving.
-
-The main idea is to estimate how much a taxi ride should cost from trip related details. This can support fare estimation and also help in identifying overcharge cases.
+---
 
 ## Problem Statement
+Taxi fares depend on factors like distance, duration, pricing type, and timing. However, real-world data often contains inconsistencies. This project aims to build a robust regression model to predict fares and flag records where the actual fare deviates significantly from the expected value.
 
-The goal of this project is to build a regression model that can predict taxi fare amount from ride information such as trip distance, ride duration, passenger count, pricing type, and ride timing.
+### Business Use Case
+* **Fare Estimation:** Provide users with accurate upfront costs.
+* **Fraud Detection:** Identify overcharging or "long-hauling."
+* **Data Quality:** Monitor the integrity of TLC trip records.
+* **Pricing Analysis:** Understand patterns in pricing across different times and categories.
 
-## Business Use Case
-
-This project is useful for more than only prediction.
-
-A good fare prediction model can help in:
-
-1. fare estimation before analysis
-2. overcharge detection
-3. anomaly identification
-4. pricing pattern understanding
-5. quality monitoring of taxi trip records
-
-If predicted fare and actual fare are very different, it may indicate:
-
-1. meter issue
-2. route inefficiency
-3. fare recording problem
-4. exceptional pricing case
+---
 
 ## Dataset Summary
-
-The notebook analysis shows the following dataset details:
+The dataset consists of trip-level records from the NYC TLC.
 
 | Item | Value |
-| --- | --- |
-| Total rows | 22,699 |
-| Total columns | 18 |
-| Time coverage | 2017 |
-| Data type | Trip level taxi records |
+| :--- | :--- |
+| **Total Rows** | 22,699 |
+| **Total Columns** | 18 |
+| **Time Coverage** | 2017 |
+| **Data Type** | Trip-level records |
 
-### Important Columns
+### Key Features
+* **Temporal:** `tpep_pickup_datetime`, `tpep_dropoff_datetime`
+* **Trip Details:** `passenger_count`, `trip_distance`, `RatecodeID`
+* **Target:** `fare_amount` (Tip amount is excluded to prevent data leakage)
 
-| Column Name | Description |
-| --- | --- |
-| `VendorID` | Taxi provider code |
-| `tpep_pickup_datetime` | Pickup date and time |
-| `tpep_dropoff_datetime` | Dropoff date and time |
-| `passenger_count` | Number of passengers |
-| `trip_distance` | Distance travelled in miles |
-| `RatecodeID` | Fare category |
-| `store_and_fwd_flag` | Whether record was stored before sending |
-| `payment_type` | Payment method |
-| `fare_amount` | Target variable |
-| `tip_amount` | Tip paid after ride |
-| `total_amount` | Final charged amount |
+---
 
-## Project Structure
+## Project Workflow
 
-```text
-New York City Taxi and Limousine Commission (TLC)/
-│
-├── Model/
-│   ├── New York TLC.ipynb
-│   ├── model.pkl
-│   └── pipe.pkl
-│
-└── requirement.txt
+### 1. Data Cleaning & Preprocessing
+To ensure model reliability, the following steps were taken:
+* Standardized datetime formats and categorical types.
+* Removed negative/zero fares and unrealistic trip distances.
+* Filtered out disputed payments and extreme outliers (e.g., \$999.99 fares).
+* Handled unrealistic trip durations.
 
+### 2. Exploratory Data Analysis (EDA)
+* **Distance vs. Fare:** Strong positive correlation.
+* **Duration:** Significant impact, though secondary to distance.
+* **Distribution:** Fare amounts are right-skewed.
+* **Categorical:** Passenger count has a negligible effect on the total fare.
+
+### 3. Statistical Analysis
+Validated patterns using:
+* **T-tests**
+* **ANOVA**
+* **Tukey HSD Test** (to verify significant differences between pricing groups).
+
+### 4. Feature Engineering
+New features created to capture hidden patterns:
+* `ride_duration`: Total time elapsed.
+* `time_period`: Categorized as Rush Hour, Mid-day, Night, etc.
+* `is_weekend` / `is_holiday`: Boolean indicators.
+* `speed`: Average trip speed to detect traffic impact.
+
+---
+
+## Model Architecture
+
+### Preprocessing Pipeline
+Built using **Scikit-learn**, the pipeline includes:
+* **RobustScaler:** For `trip_distance` and `ride_duration` (handles outliers).
+* **StandardScaler:** For `passenger_count`.
+* **OneHotEncoder:** For categorical variables.
+
+### The Model: Stacking Regressor
+A stacked ensemble was used to capture both linear and non-linear relationships:
+* **Base Models:** Linear Regression & Decision Tree Regressor.
+* **Meta-Model:** Ridge Regression.
+
+### Performance
+| Metric | Value |
+| :--- | :--- |
+| **Cross-validation $R^2$** | 0.9765 |
+| **Test $R^2$** | 0.9526 |
+
+---
+
+## Fraud Detection Logic
+The system identifies fraud by calculating the residual between the predicted and actual fare:
+> **$\text{Anomaly Flag} = |\text{Actual Fare} - \text{Predicted Fare}| > \text{Threshold}$**
+
+Large discrepancies may indicate meter tampering, inefficient routing, or manual entry errors.
+
+---
+
+## Tech Stack
+* **Languages:** Python
+* **Data Ops:** Pandas, NumPy
+* **Visualization:** Matplotlib, Seaborn
+* **Machine Learning:** Scikit-learn, Statsmodels
+* **Utilities:** Holidays, Pickle
+
+---
+
+
+
+
+## Contact Me
+
+[![GitHub](https://img.shields.io/badge/GitHub-DA--Mohit--Yadav-181717?style=for-the-badge&logo=github)](https://github.com/DA-Mohit-Yadav)
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Mohit%20Yadav-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/mohit-yadav-0394b224a/)
+
+[![Email](https://img.shields.io/badge/Email-mohitkaninwal12%40gmail.com-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:mohitkaninwal12@gmail.com)
